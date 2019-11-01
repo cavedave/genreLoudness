@@ -1,6 +1,5 @@
 pandas
 seaborn
-os
 matplotlib.pyplot
 matplotlib.collections
 ptitprince
