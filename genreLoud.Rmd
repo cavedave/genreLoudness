@@ -1,0 +1,156 @@
+---
+title: "Loudness by Genre"
+output: html_notebook
+---
+
+An analysis of music by Genre to see if loudness varies
+
+It was believed that online streaming platform have reduced loudness. But does this have the same effect accross all genres of music?
+
+
+ There are 26 genres so it is a total of 232,725 tracks.
+
+
+If we are right and loudness in the music production is bad for hearing 
+but that music streaming services like spotify 
+
+The most popular genres in the top 40 are now
+Hip-hop, Pop, Rock, Electronic are the most popular genres in the top-40
+
+https://www.economist.com/graphic-detail/2018/02/02/popular-music-is-more-collaborative-than-ever
+
+The data is in
+
+https://www.kaggle.com/zaheenhamidani/ultimate-spotify-tracks-db/download
+
+Explain why this way of looking at loudness matters
+
+
+First load some data. This is a version of the full dataset but missing lots of columns. How we construct it is below
+
+```{r}
+library(stringr)
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(readr)
+
+df2=read.csv("smalldata.csv",encoding = "UTF-8" )
+
+head(df2)
+```
+
+
+How these graphs are made
+
+https://micahallen.org/2018/03/15/introducing-raincloud-plots/
+
+
+
+
+```{r}
+
+p3 <- ggplot(df2,aes(x=genre,y=loudness, fill = genre))+
+  geom_flat_violin(position = position_nudge(x = .2, y = 0),adjust = 2)+
+  geom_point(position = position_jitter(width = .15), size = .25)+
+  ylab('Loudness')+xlab('Genre')+coord_flip()+theme_cowplot()+guides(fill = FALSE)+
+  geom_boxplot(width = .1, guides = FALSE, outlier.shape = NA, alpha = 0.5) +
+ #  geom_boxplot(aes(x = as.numeric(genre), y = loudness),outlier.shape = NA, alpha = 0.3, width = .1, colour = "BLACK") +#+0.25
+ # geom_errorbar(data = summary_loud, aes(x = genre, y = Mean, ymin = Mean-ci, ymax = Mean+ci), position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8)+
+
+  ggtitle('Loudness by Genre')+
+theme(plot.title = element_text(hjust = 0.5))
+
+ggsave("GenreR.png", height=20, width=20)
+
+p3
+
+```
+
+```{r}
+summary_loud<-as.data.frame(tapply(df2$loudness, df2$genre, summary))
+```
+
+
+```{r}
+
+summary_loud<-as.data.frame(summary(df2))
+
+```
+
+
+```{r}
+summary_loud
+```
+
+```{r}
+df=read.csv("spotify.csv",encoding = "UTF-8" )
+
+head(df)
+```
+
+
+```{r}
+names(df)[1] <- "genre"
+head(df)
+```
+
+
+```{r}
+
+#library(lavaan)
+
+
+df<-dplyr::select(df, -c('artist_name', 'key','mode','time_signature','track_name','track_id','popularity','danceability','acousticness','duration_ms','energy','instrumentalness','liveness','speechiness','tempo','valence')) 
+
+
+```
+
+
+```{r}
+summary(df)
+```
+
+
+This gets the stats on each genre. Median ,mean loudness and such
+
+```{r}
+#summary<-
+tapply(df$loudness, df$genre, summary)
+```
+
+$`Children's Music`
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-36.721 -14.094 -11.286 -11.642  -8.614   0.948 
+
+$`Children’s Music`
+data['genre'] = data['genre'].str.replace('’','\'')
+
+df<-str_replace_all(df$genre, "’", "'")
+summary(df)
+
+
+
+
+
+```{r}
+head(df)
+```
+
+
+filter out uncommon genres or ones I think are repetition
+
+```{r}
+
+df2 <-filter(df, grepl('Dance|Rock|Pop|Classical', genre))
+head(df2)
+
+```
+
+```{r}
+# Write CSV in R
+write.csv(df2, file = "smalldata.csv", row.names=FALSE)
+```
+
+
+
